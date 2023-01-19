@@ -8,10 +8,10 @@
         {
             "name": "PlatformIO",
             "includePath": [
-                "D:/Projects_Act/iot/glcd-emulator-client-arduino/include",
-                "D:/Projects_Act/iot/glcd-emulator-client-arduino/src",
+                "D:/Projects_Act/iot/smart-fish-tank/misc/glcd-emulator-client-arduino/include",
+                "D:/Projects_Act/iot/smart-fish-tank/misc/glcd-emulator-client-arduino/src",
                 "C:/Users/Administrator/.platformio/packages/framework-arduinoespressif32/libraries/WiFi/src",
-                "D:/Projects_Act/iot/glcd-emulator-client-arduino/.pio/libdeps/esp32-c3-devkitm-1/U8g2/src",
+                "D:/Projects_Act/iot/smart-fish-tank/misc/glcd-emulator-client-arduino/.pio/libdeps/esp32-c3-devkitm-1/U8g2/src",
                 "C:/Users/Administrator/.platformio/packages/framework-arduinoespressif32/libraries/Wire/src",
                 "C:/Users/Administrator/.platformio/packages/framework-arduinoespressif32/libraries/SPI/src",
                 "C:/Users/Administrator/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32c3/include/newlib/platform_include",
@@ -234,10 +234,10 @@
             "browse": {
                 "limitSymbolsToIncludedHeaders": true,
                 "path": [
-                    "D:/Projects_Act/iot/glcd-emulator-client-arduino/include",
-                    "D:/Projects_Act/iot/glcd-emulator-client-arduino/src",
+                    "D:/Projects_Act/iot/smart-fish-tank/misc/glcd-emulator-client-arduino/include",
+                    "D:/Projects_Act/iot/smart-fish-tank/misc/glcd-emulator-client-arduino/src",
                     "C:/Users/Administrator/.platformio/packages/framework-arduinoespressif32/libraries/WiFi/src",
-                    "D:/Projects_Act/iot/glcd-emulator-client-arduino/.pio/libdeps/esp32-c3-devkitm-1/U8g2/src",
+                    "D:/Projects_Act/iot/smart-fish-tank/misc/glcd-emulator-client-arduino/.pio/libdeps/esp32-c3-devkitm-1/U8g2/src",
                     "C:/Users/Administrator/.platformio/packages/framework-arduinoespressif32/libraries/Wire/src",
                     "C:/Users/Administrator/.platformio/packages/framework-arduinoespressif32/libraries/SPI/src",
                     "C:/Users/Administrator/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32c3/include/newlib/platform_include",

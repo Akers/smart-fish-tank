@@ -186,4 +186,4 @@
  C:/Users/Administrator/.platformio/packages/framework-arduinoespressif32/libraries/WiFi/src/WiFiUdp.h \
  C:/Users/Administrator/.platformio/packages/framework-arduinoespressif32/cores/esp32/Udp.h \
  C:/Users/Administrator/.platformio/packages/framework-arduinoespressif32/cores/esp32/cbuf.h \
- src/ui/pages.h
+ src/ui/pages.h src/ui/Menu.h src/ui/logos.h

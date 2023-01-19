@@ -174,3 +174,24 @@ void draw_main_page(GlcdRemoteClient *u8g2, const char *timeStr, uint8_t curTemp
     draw_TDS(u8g2, tds);
     u8g2->sendBuffer();
 }
+
+/**
+ * 绘制图标菜单
+*/
+void draw_icon_menu(GlcdRemoteClient *u8g2)
+{
+    u8g2->clearBuffer();
+    u8g2->drawXBMP(40, 2, 48, 48, icon_feeding_48);
+    u8g2->setFont(HarmonyOS_Sans_14);
+    u8g2->setCursor(36, 60);
+    u8g2->print("喂食模式");
+    u8g2->sendBuffer();
+}
+
+/**
+ * 绘制列表菜单
+*/
+void draw_list_menu(GlcdRemoteClient *u8g2, MenuStruct &menu)
+{
+
+}
