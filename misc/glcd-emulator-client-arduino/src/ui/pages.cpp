@@ -1,6 +1,6 @@
 #include "pages.h"
-#include "logos.h"
-#include "HarmonyOS_Sans_14.h"
+#include "icons.h"
+#include "customer_font.h"
 
 
 /**
@@ -80,7 +80,7 @@ void draw_temperature(U8G2 *u8g2, uint8_t curTemp, uint8_t targetTemp)
     u8g2->setFont(u8g2_font_freedoomr10_tu);
     u8g2->drawLine(40, 45, 40, 54);
     u8g2->drawStr(43, 57, targetTempStr);
-    u8g2->drawXBMP(40, 25, 18, 18, icon_temp_18);
+    drawIcon(u8g2, 40, 25, ICONS::TEMPUTER_18X18);
 }
 
 /**
@@ -133,32 +133,38 @@ void draw_main_page(GlcdRemoteClient *u8g2, const char *timeStr, uint8_t curTemp
     // WIFI连接图标
     if (wifiFlag)
     {
-        draw_wifi(u8g2);
+        // draw_wifi(u8g2);
+        drawIcon(u8g2, 113, 2, ICONS::WIFI_12X12);
     }
     // 水泵启动图标
     if (pumpFlag)
     {
-        draw_pump(u8g2);
+        // draw_pump(u8g2);
+        drawIcon(u8g2, 100, 2, ICONS::PUMP_12X12);
     }
     // 水草灯启动标识
     if (lightFlag)
     {
-        draw_light(u8g2);
+        // draw_light(u8g2);
+        drawIcon(u8g2, 87, 1, ICONS::LIGHT_12X12);
     }
     // 加热棒启动标识
     if (heaterFlag)
     {
-        draw_heater(u8g2);
+        // draw_heater(u8g2);
+        drawIcon(u8g2, 74, 2, ICONS::HEATER_12X12);
     }
     // 加氧启动标识
     if (o2Flag)
     {
-        draw_o2(u8g2);
+        // draw_o2(u8g2);
+        drawIcon(u8g2, 61, 2, ICONS::O2_12X12);
     }
     // 喂食器启动标识
     if (feedFlag)
     {
-        draw_fish(u8g2);
+        // draw_fish(u8g2);
+        drawIcon(u8g2, 48, 1, ICONS::FISH_12X12);
     }
 
     // 分割线
@@ -178,20 +184,22 @@ void draw_main_page(GlcdRemoteClient *u8g2, const char *timeStr, uint8_t curTemp
 /**
  * 绘制图标菜单
 */
-void draw_icon_menu(GlcdRemoteClient *u8g2)
+void draw_icon_menu(GlcdRemoteClient *u8g2, MenuItem menu)
 {
     u8g2->clearBuffer();
-    u8g2->drawXBMP(40, 2, 48, 48, icon_feeding_48);
-    u8g2->setFont(HarmonyOS_Sans_14);
-    u8g2->setCursor(36, 60);
-    u8g2->print("喂食模式");
+    // u8g2->drawXBMP(40, 2, 48, 48, menu->icon);
+    // u8g2->drawXBMP(40, 2, 48, 48, *menu->icon);
+    drawIconDebug(u8g2, 40, 0, menu.icon);
+    u8g2->setFont(YaHei_12);
+    u8g2->setCursor(40, 60);
+    u8g2->print(menu.name);
     u8g2->sendBuffer();
 }
 
 /**
  * 绘制列表菜单
 */
-void draw_list_menu(GlcdRemoteClient *u8g2, MenuStruct &menu)
+void draw_list_menu(GlcdRemoteClient *u8g2, MenuItem menu)
 {
 
 }

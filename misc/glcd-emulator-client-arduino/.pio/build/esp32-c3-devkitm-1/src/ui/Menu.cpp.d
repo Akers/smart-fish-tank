@@ -157,7 +157,7 @@
  C:/Users/Administrator/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32c3/include/spi_flash/include/esp_spi_flash.h \
  C:/Users/Administrator/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32c3/include/spi_flash/include/esp_spi_flash_counters.h \
  C:/Users/Administrator/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32c3/include/esp_hw_support/include/soc/esp32/spiram.h \
- src/ui/logos.h .pio/libdeps/esp32-c3-devkitm-1/U8g2/src/U8g2lib.h \
+ src/ui/icons.h .pio/libdeps/esp32-c3-devkitm-1/U8g2/src/U8g2lib.h \
  C:/Users/Administrator/.platformio/packages/framework-arduinoespressif32/cores/esp32/Print.h \
  .pio/libdeps/esp32-c3-devkitm-1/U8g2/src/U8x8lib.h \
  .pio/libdeps/esp32-c3-devkitm-1/U8g2/src/clib/u8x8.h \
@@ -183,4 +183,5 @@
  C:/Users/Administrator/.platformio/packages/framework-arduinoespressif32/libraries/WiFi/src/WiFiUdp.h \
  C:/Users/Administrator/.platformio/packages/framework-arduinoespressif32/cores/esp32/Udp.h \
  C:/Users/Administrator/.platformio/packages/framework-arduinoespressif32/cores/esp32/cbuf.h \
- src/ui/HarmonyOS_Sans_14.h
+ .pio/libdeps/esp32-c3-devkitm-1/U8g2/src/U8G2Lib.h \
+ src/ui/customer_font.h

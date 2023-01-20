@@ -1,85 +1,116 @@
 #include "Menu.h"
-#include "HarmonyOS_Sans_14.h"
+#include "customer_font.h"
 
 Menu::Menu(/* args */)
 {
     // 菜单0: 首页
-    MenuStruct home;
+    MenuItem home(ICONS::HOME_48X48);
     home.id = 1;
     strcpy(home.name, "返回主屏");
     strcpy(home.code, "Home");
     home.type = MenuType::ICON_SWITCH;
-    home.icon = icon_home_48;
-    this->menus[0] = home;
+    this->menus.push_back(home);
 
 
     // 菜单1: 开启喂食模式
-    MenuStruct feedModeSwitch;
+    MenuItem feedModeSwitch(ICONS::FEEDING_48X48);
     feedModeSwitch.id = 2;
     strcpy(feedModeSwitch.name, "喂食模式");
     strcpy(feedModeSwitch.code, "FeedMode");
     feedModeSwitch.type = MenuType::ICON_SWITCH;
-    feedModeSwitch.icon = icon_feeding_48;
-    this->menus[1] = feedModeSwitch;
+    this->menus.push_back(feedModeSwitch);
 
     // 菜单2: 水泵开关
-    MenuStruct pumpSwitch;
+    MenuItem pumpSwitch(ICONS::PUMP_48X48);
     pumpSwitch.id = 3;
     strcpy(pumpSwitch.name, "开启水泵");
     strcpy(pumpSwitch.code, "PumpSwitch");
     pumpSwitch.type = MenuType::ICON_SWITCH;
-    pumpSwitch.icon = icon_pump_48;
-    this->menus[2] = pumpSwitch;
+    this->menus.push_back(pumpSwitch);
 
     // 菜单3: 灯光开关
-    MenuStruct lightSwitch;
+    MenuItem lightSwitch(ICONS::LIGHT_48X48);
     lightSwitch.id = 4;
-    strcpy(lightSwitch.name, "打开灯光");
+    strcpy(lightSwitch.name, "开启灯光");
     strcpy(lightSwitch.code, "LightSwitch");
     lightSwitch.type = MenuType::ICON_SWITCH;
-    lightSwitch.icon = icon_light_48;
-    this->menus[3] = lightSwitch;
+    this->menus.push_back(lightSwitch);
+
 
     // 菜单4: 加热开关
-    MenuStruct heaterSwitch;
+    MenuItem heaterSwitch(ICONS::HEATER_48X48);
     heaterSwitch.id = 5;
     strcpy(heaterSwitch.name, "开启加热");
     strcpy(heaterSwitch.code, "HeaterSwitch");
     heaterSwitch.type = MenuType::ICON_SWITCH;
-    heaterSwitch.icon = icon_heater_48;
-    this->menus[4] = heaterSwitch;
+    this->menus.push_back(heaterSwitch);
+
 
     // 菜单5: 设置页面
-    MenuStruct settings;
+    MenuItem settings(ICONS::SETTING_48X48);
     settings.id = 5;
-    strcpy(settings.name, "进入设置");
+    strcpy(settings.name, "设置菜单");
     strcpy(settings.code, "settings");
     settings.type = MenuType::ICON_SWITCH;
-    settings.icon = icon_settings_48;
-    this->menus[5] = settings;
+    this->menus.push_back(settings);
+
 
     // 默认选中菜单1（喂食模式）
-    this->curMenu = &feedModeSwitch;
+    this->selectedMenuIdx = 1;
 }
 
-void Menu::show(GlcdRemoteClient *u8g2)
+void Menu::show(U8G2 *u8g2)
 {
     this->refresh(u8g2);
 }
 
-void Menu::refresh(GlcdRemoteClient *u8g2) 
+void Menu::refresh(U8G2 *u8g2) 
 {
     u8g2->clearBuffer();
-    u8g2->drawXBMP(40, 10, 48, 48, this->curMenu->icon);
+    drawIcon(u8g2, 40, 10, this->getSelectedMenu().icon);
     u8g2->setFont(HarmonyOS_Sans_14);
     u8g2->setCursor(20, 48);
     u8g2->print(this->curMenu->name);
     u8g2->sendBuffer();
 }
 
-MenuStruct *Menu::getCurMenu()
+MenuItem *Menu::getCurMenu()
 {
     return this->curMenu;
+}
+
+MenuItem Menu::getSelectedMenu()
+{
+    return this->menus[this->selectedMenuIdx];
+}
+
+void Menu::next()
+{
+    if (++this->selectedMenuIdx >= this->menus.size())
+    {
+        this->selectedMenuIdx = 0;
+        this->curMenu = &(this->menus[this->selectedMenuIdx]);
+    } else {
+        this->curMenu = &(this->menus[this->selectedMenuIdx]);
+    }
+}
+
+void Menu::prev()
+{
+    if (--this->selectedMenuIdx <= 0 )
+    {
+        this->selectedMenuIdx = this->menus.size() - 1;
+        this->curMenu = &(this->menus[this->selectedMenuIdx]);
+    } else {
+        this->curMenu = &(this->menus[this->selectedMenuIdx]);
+    }
+}
+
+void Menu::back()
+{
+    if (this->curMenu->parent) {
+        this->curMenu = this->curMenu->parent;
+    }
 }
 
 Menu::~Menu()

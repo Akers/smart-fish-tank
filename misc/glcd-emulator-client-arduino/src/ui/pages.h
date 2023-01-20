@@ -9,12 +9,12 @@ void draw_main_page(GlcdRemoteClient *u8g2, const char *timeStr, uint8_t curTemp
 /**
  * 绘制图标菜单
 */
-void draw_icon_menu(GlcdRemoteClient *u8g2);
+void draw_icon_menu(GlcdRemoteClient *u8g2, MenuItem menu);
 
 /**
  * 绘制列表菜单
 */
-void draw_list_menu(GlcdRemoteClient *u8g2, MenuStruct *menu);
+void draw_list_menu(GlcdRemoteClient *u8g2, MenuItem menu);
 
 
 

@@ -1,6 +1,8 @@
 #include <Arduino.h>
-#include "logos.h"
-#include <GlcdRemoteClient.h>
+#include "icons.h"
+#include <U8G2Lib.h>
+#include <vector> 
+using namespace std;
 
 #ifndef _MenuStruct
 #define _MenuStruct
@@ -16,26 +18,29 @@ enum MenuType {
     LIST_ITEM
 };
 
-struct MenuStruct
+class MenuItem
 {
+public:
     uint8_t id;
     char name[20];
     char code[40];
-    const uint8_t *icon;
+    ICONS icon;
     MenuType type;
-    MenuStruct *children[5];
-    MenuStruct *parent;
+    MenuItem *children[5];
+    MenuItem *parent;
+    MenuItem(ICONS i) : icon(i) {};
 };
+
 class Menu
 {
 private:
     /* data */
     // 菜单列表
-    MenuStruct menus[10];
+    vector<MenuItem> menus;
     // 当前选中菜单序号
     int selectedMenuIdx = 0;
     // 当前菜单指针，根菜单时为空
-    MenuStruct *curMenu;
+    MenuItem *curMenu;
 public:
     Menu(/* args */);
     ~Menu();
@@ -46,11 +51,12 @@ public:
     // 返回上一层菜单
     void back();
     // 绘制菜单
-    void show(GlcdRemoteClient *u8g2);
+    void show(U8G2 *u8g2);
     // 刷新菜单
-    void refresh(GlcdRemoteClient *u8g2);
+    void refresh(U8G2 *u8g2);
     // 获取当前菜单
-    MenuStruct *getCurMenu();
+    MenuItem *getCurMenu();
+    MenuItem getSelectedMenu();
 };
 
 #endif
