@@ -181,6 +181,39 @@ void draw_main_page(GlcdRemoteClient *u8g2, const char *timeStr, uint8_t curTemp
     u8g2->sendBuffer();
 }
 
+void draw_main_page(GlcdRemoteClient *u8g2, const char *timeStr, uint8_t curTemp, uint8_t targetTemp, uint8_t airTemp, uint8_t airHumidity, uint8_t tds, vector<StatusFlag> statusFlags)
+{
+    u8g2->clearBuffer();
+    u8g2->setFont(HarmonyOS_Sans_14);
+    // 当前时间
+    u8g2->setCursor(3, 13);
+    u8g2->print(timeStr);
+
+    int size = statusFlags.size();
+    int y_pox = 113;
+    for (int i = 0; i < size; i++) 
+    {
+        y_pox = 113 - (i * 13);
+        if (y_pox < 0) {
+            y_pox = 0;
+        }
+        drawIcon(u8g2, y_pox, 2, statusIconMap[statusFlags[i]]);
+    }
+
+    // 分割线
+    u8g2->drawLine(4, 15, 123, 15);
+
+    // 温度显示
+    draw_temperature(u8g2, curTemp, targetTemp);
+
+    // 纵向分割
+    u8g2->drawLine(61, 22, 61, 57);
+    draw_air_temp(u8g2, airTemp);
+    draw_air_humidity(u8g2, airHumidity);
+    draw_TDS(u8g2, tds);
+    u8g2->sendBuffer();
+}
+
 /**
  * 绘制图标菜单
 */
@@ -196,10 +229,50 @@ void draw_icon_menu(GlcdRemoteClient *u8g2, MenuItem menu)
     u8g2->sendBuffer();
 }
 
+static const int LIST_MENU_PAGE_SIZE = 3;
+static const int MENU_NAME_POS_X = 4;
+static const int MENU_NAME_BOX_WIDTH = 120;
+
 /**
  * 绘制列表菜单
+ * @param menu 当前列表菜单的父级菜单对象
+ * @param post 当前菜单位置
 */
-void draw_list_menu(GlcdRemoteClient *u8g2, MenuItem menu)
+void draw_list_menu(GlcdRemoteClient *u8g2, MenuItem menu, int pos)
 {
+    u8g2->clearBuffer();
+    // 计算当前选中序号所在页数
+    int pageNum = pos <= LIST_MENU_PAGE_SIZE ? 1 : (int)((pos - 1) / LIST_MENU_PAGE_SIZE);
+    // 计算需展示菜单区间
+    int start = (pageNum - 1) * LIST_MENU_PAGE_SIZE;
+    int end = start + LIST_MENU_PAGE_SIZE - 1;
+    
+    if (end > (menu.children.size() - 1)) {
+        end = menu.children.size() - 1;
+    }
+    int menuNameYPos = 3;
+    u8g2->setFont(HarmonyOS_Sans_12);
+    for (int i = start; i <= end; i ++)
+    {
+        // 计算展示位置
+        u8g2->setCursor(MENU_NAME_POS_X, menuNameYPos);
+        
+        if (pos == i) 
+        {
+            // 菜单选中
+            u8g2->setDrawColor(0);
+            u8g2->drawRBox(MENU_NAME_POS_X, menuNameYPos, MENU_NAME_BOX_WIDTH, 16, 2);
+        } 
+        else 
+        {
+            u8g2->setDrawColor(1);
+        }
 
+        u8g2->print(menu.children[i].name);
+
+        menuNameYPos += 20;
+
+    }
+
+    u8g2->sendBuffer();
 }

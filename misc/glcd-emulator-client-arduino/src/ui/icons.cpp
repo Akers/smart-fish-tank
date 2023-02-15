@@ -22,6 +22,9 @@ void drawIcon(U8G2* u8g2, u8g2_uint_t x, u8g2_uint_t y, ICONS iconName)
     case FISH_12X12:
         u8g2->drawXBMP(x, y, 12, 12, icon_fish);
         break;
+    case COOLER_12X12:
+        u8g2->drawXBMP(x, y, 12, 12, icon_cooler);
+        break;
     case TEMPUTER_18X18:
         u8g2->drawXBMP(x, y, 18, 18, icon_temp_18);
         break;
@@ -72,6 +75,9 @@ void drawIconDebug(GlcdRemoteClient* u8g2, u8g2_uint_t x, u8g2_uint_t y, ICONS i
         break;
     case HEATER_12X12:
         u8g2->drawXBMP(x, y, 12, 12, icon_heater);
+        break;
+    case COOLER_12X12:
+        u8g2->drawXBMP(x, y, 12, 12, icon_cooler);
         break;
     case FISH_12X12:
         u8g2->drawXBMP(x, y, 12, 12, icon_fish);

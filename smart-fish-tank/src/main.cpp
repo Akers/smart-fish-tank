@@ -20,19 +20,6 @@ void setup() {
 
 void loop() {
   // put your main code here, to run repeatedly:
-  Serial.printf("loop: %d\r\n", count);
-  if (++count % 2 == 0  ) {
-    digitalWrite(13, LOW);
-    digitalWrite(12, HIGH);
-  } else {
-    digitalWrite(12, LOW);
-    digitalWrite(13, HIGH);
-  }
-  // draw_main_page(u8g2);
-  // u8g2.firstPage();
-  // do {
-  //   u8g2.setFont(u8g2_font_ncenB14_tr);
-  //   u8g2.drawStr(0,24,"Hello World!");
-  // } while ( u8g2.nextPage() );
+
   delay(2000);
 }

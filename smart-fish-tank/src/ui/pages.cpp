@@ -1,6 +1,6 @@
 #include "pages.h"
-#include "logos.h"
-#include "HarmonyOS_Sans_14.h"
+#include "icons.h"
+#include "customer_font.h"
 
 
 /**
@@ -80,7 +80,7 @@ void draw_temperature(U8G2 *u8g2, uint8_t curTemp, uint8_t targetTemp)
     u8g2->setFont(u8g2_font_freedoomr10_tu);
     u8g2->drawLine(40, 45, 40, 54);
     u8g2->drawStr(43, 57, targetTempStr);
-    u8g2->drawXBMP(40, 25, 18, 18, icon_temp_18);
+    drawIcon(u8g2, 40, 25, ICONS::TEMPUTER_18X18);
 }
 
 /**
@@ -133,32 +133,38 @@ void draw_main_page(U8G2 *u8g2, const char *timeStr, uint8_t curTemp, uint8_t ta
     // WIFI连接图标
     if (wifiFlag)
     {
-        draw_wifi(u8g2);
+        // draw_wifi(u8g2);
+        drawIcon(u8g2, 113, 2, ICONS::WIFI_12X12);
     }
     // 水泵启动图标
     if (pumpFlag)
     {
-        draw_pump(u8g2);
+        // draw_pump(u8g2);
+        drawIcon(u8g2, 100, 2, ICONS::PUMP_12X12);
     }
     // 水草灯启动标识
     if (lightFlag)
     {
-        draw_light(u8g2);
+        // draw_light(u8g2);
+        drawIcon(u8g2, 87, 1, ICONS::LIGHT_12X12);
     }
     // 加热棒启动标识
     if (heaterFlag)
     {
-        draw_heater(u8g2);
+        // draw_heater(u8g2);
+        drawIcon(u8g2, 74, 2, ICONS::HEATER_12X12);
     }
     // 加氧启动标识
     if (o2Flag)
     {
-        draw_o2(u8g2);
+        // draw_o2(u8g2);
+        drawIcon(u8g2, 61, 2, ICONS::O2_12X12);
     }
     // 喂食器启动标识
     if (feedFlag)
     {
-        draw_fish(u8g2);
+        // draw_fish(u8g2);
+        drawIcon(u8g2, 48, 1, ICONS::FISH_12X12);
     }
 
     // 分割线
@@ -172,5 +178,101 @@ void draw_main_page(U8G2 *u8g2, const char *timeStr, uint8_t curTemp, uint8_t ta
     draw_air_temp(u8g2, airTemp);
     draw_air_humidity(u8g2, airHumidity);
     draw_TDS(u8g2, tds);
+    u8g2->sendBuffer();
+}
+
+void draw_main_page(U8G2 *u8g2, const char *timeStr, uint8_t curTemp, uint8_t targetTemp, uint8_t airTemp, uint8_t airHumidity, uint8_t tds, vector<StatusFlag> statusFlags)
+{
+    u8g2->clearBuffer();
+    u8g2->setFont(HarmonyOS_Sans_14);
+    // 当前时间
+    u8g2->setCursor(3, 13);
+    u8g2->print(timeStr);
+
+    int size = statusFlags.size();
+    int y_pox = 113;
+    for (int i = 0; i < size; i++) 
+    {
+        y_pox = 113 - (i * 13);
+        if (y_pox < 0) {
+            y_pox = 0;
+        }
+        drawIcon(u8g2, y_pox, 2, statusIconMap[statusFlags[i]]);
+    }
+
+    // 分割线
+    u8g2->drawLine(4, 15, 123, 15);
+
+    // 温度显示
+    draw_temperature(u8g2, curTemp, targetTemp);
+
+    // 纵向分割
+    u8g2->drawLine(61, 22, 61, 57);
+    draw_air_temp(u8g2, airTemp);
+    draw_air_humidity(u8g2, airHumidity);
+    draw_TDS(u8g2, tds);
+    u8g2->sendBuffer();
+}
+
+/**
+ * 绘制图标菜单
+*/
+void draw_icon_menu(U8G2 *u8g2, MenuItem menu)
+{
+    u8g2->clearBuffer();
+    // u8g2->drawXBMP(40, 2, 48, 48, menu->icon);
+    // u8g2->drawXBMP(40, 2, 48, 48, *menu->icon);
+    drawIcon(u8g2, 40, 0, menu.icon);
+    u8g2->setFont(YaHei_12);
+    u8g2->setCursor(40, 60);
+    u8g2->print(menu.name);
+    u8g2->sendBuffer();
+}
+
+static const int LIST_MENU_PAGE_SIZE = 3;
+static const int MENU_NAME_POS_X = 4;
+static const int MENU_NAME_BOX_WIDTH = 120;
+
+/**
+ * 绘制列表菜单
+ * @param menu 当前列表菜单的父级菜单对象
+ * @param post 当前菜单位置
+*/
+void draw_list_menu(U8G2 *u8g2, MenuItem menu, int pos)
+{
+    u8g2->clearBuffer();
+    // 计算当前选中序号所在页数
+    int pageNum = pos <= LIST_MENU_PAGE_SIZE ? 1 : (int)((pos - 1) / LIST_MENU_PAGE_SIZE);
+    // 计算需展示菜单区间
+    int start = (pageNum - 1) * LIST_MENU_PAGE_SIZE;
+    int end = start + LIST_MENU_PAGE_SIZE - 1;
+    
+    if (end > (menu.children.size() - 1)) {
+        end = menu.children.size() - 1;
+    }
+    int menuNameYPos = 3;
+    u8g2->setFont(HarmonyOS_Sans_12);
+    for (int i = start; i <= end; i ++)
+    {
+        // 计算展示位置
+        u8g2->setCursor(MENU_NAME_POS_X, menuNameYPos);
+        
+        if (pos == i) 
+        {
+            // 菜单选中
+            u8g2->setDrawColor(0);
+            u8g2->drawRBox(MENU_NAME_POS_X, menuNameYPos, MENU_NAME_BOX_WIDTH, 16, 2);
+        } 
+        else 
+        {
+            u8g2->setDrawColor(1);
+        }
+
+        u8g2->print(menu.children[i].name);
+
+        menuNameYPos += 20;
+
+    }
+
     u8g2->sendBuffer();
 }

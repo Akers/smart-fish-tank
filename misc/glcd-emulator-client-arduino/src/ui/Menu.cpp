@@ -1,6 +1,9 @@
 #include "Menu.h"
 #include "customer_font.h"
 
+MenuItem::MenuItem()
+{}
+
 Menu::Menu(/* args */)
 {
     // 菜单0: 首页
@@ -52,11 +55,63 @@ Menu::Menu(/* args */)
     strcpy(settings.name, "设置菜单");
     strcpy(settings.code, "settings");
     settings.type = MenuType::ICON_SWITCH;
-    this->menus.push_back(settings);
+    // 设置列表菜单
+    MenuItem setBackMenu;
+    setBackMenu.id = 50;
+    strcpy(setBackMenu.name, "返回");
+    strcpy(setBackMenu.code, "settings_back");
+    setBackMenu.type = MenuType::LIST_ITEM;
+    settings.children.push_back(setBackMenu);
 
+    MenuItem setTemperatureMenu;
+    setTemperatureMenu.id = 51;
+    strcpy(setTemperatureMenu.name, "水温设定");
+    strcpy(setTemperatureMenu.code, "settings_temp");
+    setTemperatureMenu.type = MenuType::LIST_ITEM;
+    settings.children.push_back(setTemperatureMenu);
+
+    MenuItem setFeedTimeMenu;
+    setFeedTimeMenu.id = 52;
+    strcpy(setFeedTimeMenu.name, "喂食时长设置");
+    strcpy(setFeedTimeMenu.code, "settings_feed_time");
+    setFeedTimeMenu.type = MenuType::LIST_ITEM;
+    settings.children.push_back(setFeedTimeMenu);
+
+    MenuItem setLightTimerMenu;
+    setLightTimerMenu.id = 53;
+    strcpy(setLightTimerMenu.name, "定时灯光");
+    strcpy(setLightTimerMenu.code, "settings_light_timer");
+    setLightTimerMenu.type = MenuType::LIST_ITEM;
+    settings.children.push_back(setLightTimerMenu);
+
+    MenuItem setFeedTimerMenu;
+    setFeedTimerMenu.id = 54;
+    strcpy(setFeedTimerMenu.name, "定时喂食");
+    strcpy(setFeedTimerMenu.code, "settings_feed_timer");
+    setFeedTimerMenu.type = MenuType::LIST_ITEM;
+    settings.children.push_back(setFeedTimerMenu);
+
+    MenuItem setO2TimerMenu;
+    setO2TimerMenu.id = 55;
+    strcpy(setO2TimerMenu.name, "定时增氧");
+    strcpy(setO2TimerMenu.code, "settings_o2_timer");
+    setO2TimerMenu.type = MenuType::LIST_ITEM;
+    settings.children.push_back(setO2TimerMenu);
+    
+    this->menus.push_back(settings);
 
     // 默认选中菜单1（喂食模式）
     this->selectedMenuIdx = 1;
+}
+
+// 设置当前菜单
+void Menu::setMenuById(int menuId)
+{
+    MenuItem *r = this->findMenuById(this->menus, menuId);
+    if (r != nullptr)
+    {
+        
+    }
 }
 
 void Menu::show(U8G2 *u8g2)
@@ -74,15 +129,7 @@ void Menu::refresh(U8G2 *u8g2)
     u8g2->sendBuffer();
 }
 
-MenuItem *Menu::getCurMenu()
-{
-    return this->curMenu;
-}
 
-MenuItem Menu::getSelectedMenu()
-{
-    return this->menus[this->selectedMenuIdx];
-}
 
 void Menu::next()
 {
@@ -93,6 +140,50 @@ void Menu::next()
     } else {
         this->curMenu = &(this->menus[this->selectedMenuIdx]);
     }
+}
+
+void Menu::selectMenuByIdx(int idx)
+{
+    if (idx < this->menus.size())
+    {
+        this->selectedMenuIdx = idx;
+        this->curMenu = &(menus[idx]);
+    }
+}
+
+MenuItem *Menu::getCurMenu()
+{
+    return this->curMenu;
+}
+
+MenuItem Menu::getSelectedMenu()
+{
+    return this->menus[this->selectedMenuIdx];
+}
+
+MenuItem *Menu::findMenuById(vector<MenuItem> menus, int menuId)
+{
+    MenuItem *result = nullptr;
+
+    for (vector<MenuItem>::iterator iter = menus.begin(); iter != menus.end(); iter++)
+	{
+		if (menuId == (*iter).id) 
+        {
+            result = &(*iter);
+            break;
+        }
+
+        if (!(*iter).children.empty()) 
+        {
+            result = findMenuById((*iter).children, menuId);
+            if (result != nullptr)
+            {
+                return result;
+            }
+        }
+	}
+
+    return result;
 }
 
 void Menu::prev()

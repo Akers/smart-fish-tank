@@ -26,8 +26,9 @@ public:
     char code[40];
     ICONS icon;
     MenuType type;
-    MenuItem *children[5];
+    vector<MenuItem> children;
     MenuItem *parent;
+    MenuItem();
     MenuItem(ICONS i) : icon(i) {};
 };
 
@@ -41,6 +42,8 @@ private:
     int selectedMenuIdx = 0;
     // 当前菜单指针，根菜单时为空
     MenuItem *curMenu;
+    // 根据ID查找
+    MenuItem *findMenuById(vector<MenuItem> menus, int menuId);
 public:
     Menu(/* args */);
     ~Menu();
@@ -50,12 +53,16 @@ public:
     void next();
     // 返回上一层菜单
     void back();
+    // 设置当前菜单
+    void setMenuById(int menuId);
     // 绘制菜单
     void show(U8G2 *u8g2);
     // 刷新菜单
     void refresh(U8G2 *u8g2);
     // 获取当前菜单
     MenuItem *getCurMenu();
+    // 根据菜单序号设置当前菜单
+    void selectMenuByIdx(int idx);
     MenuItem getSelectedMenu();
 };
 
