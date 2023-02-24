@@ -78,9 +78,9 @@ void draw_temperature(U8G2 *u8g2, uint8_t curTemp, uint8_t targetTemp)
     char targetTempStr[2] = {0};
     itoa(targetTemp, targetTempStr, 10);
     u8g2->setFont(u8g2_font_freedoomr10_tu);
-    u8g2->drawLine(40, 45, 40, 54);
-    u8g2->drawStr(43, 57, targetTempStr);
-    drawIcon(u8g2, 40, 25, ICONS::TEMPUTER_18X18);
+    u8g2->drawLine(43, 45, 38, 54);
+    u8g2->drawStr(45, 57, targetTempStr);
+    drawIcon(u8g2, 43, 25, ICONS::TEMPUTER_18X18);
 }
 
 /**
@@ -89,10 +89,14 @@ void draw_temperature(U8G2 *u8g2, uint8_t curTemp, uint8_t targetTemp)
 void draw_air_temp(U8G2 *u8g2, uint8_t airTemp)
 {
     u8g2->setFont(HarmonyOS_Sans_14);
-    u8g2->setCursor(65, 32);
-    u8g2->print("气温:");
+    // u8g2->setCursor(65, 32);
+    // u8g2->print("temp:");
+    u8g2->drawXBMP(80, 20, 12, 12, icon_airtemp_12);
+    // u8g2->setCursor(91, 32);
+    // u8g2->print(":");
     u8g2->setCursor(98, 32);
-    u8g2->printf("%d°C", airTemp);
+    // u8g2->printf("%d°C", airTemp);
+    u8g2->printf("%d°C", 0);
 }
 
 /**
@@ -101,8 +105,9 @@ void draw_air_temp(U8G2 *u8g2, uint8_t airTemp)
 void draw_air_humidity(U8G2 *u8g2, uint8_t airHumidity)
 {
     u8g2->setFont(HarmonyOS_Sans_14);
-    u8g2->setCursor(65, 46);
-    u8g2->print("湿度:");
+    // u8g2->setCursor(65, 46);
+    // u8g2->print("wet:");
+    u8g2->drawXBMP(80, 34, 12, 12, icon_humidity_12);
     u8g2->setCursor(98, 46);
     u8g2->printf("%d%s", airHumidity, "%");
 }
@@ -113,8 +118,9 @@ void draw_air_humidity(U8G2 *u8g2, uint8_t airHumidity)
 void draw_TDS(U8G2 *u8g2, uint8_t tds)
 {
     u8g2->setFont(HarmonyOS_Sans_14);
-    u8g2->setCursor(65, 59);
-    u8g2->print("TDS:");
+    // u8g2->setCursor(65, 59);
+    // u8g2->print("TDS:");
+    u8g2->drawXBMP(80, 47, 12, 12, icon_tds_12);
     u8g2->setCursor(98, 59);
     u8g2->printf("%d", tds);
 }
@@ -122,63 +128,39 @@ void draw_TDS(U8G2 *u8g2, uint8_t tds)
 /**
  * 绘制首页
  */
-void draw_main_page(U8G2 *u8g2, const char *timeStr, uint8_t curTemp, uint8_t targetTemp, uint8_t airTemp, uint8_t airHumidity, uint8_t tds, boolean wifiFlag, boolean pumpFlag, boolean lightFlag, boolean heaterFlag, boolean o2Flag, boolean feedFlag)
+void draw_main_page(U8G2 *u8g2, const char *timeStr, uint8_t curTemp, uint8_t targetTemp, uint8_t airTemp, uint8_t airHumidity, uint8_t tds, boolean wifiFlag, boolean pumpFlag, boolean lightFlag, boolean heaterFlag, boolean o2Flag, boolean feedFlag, boolean coolerFlag)
 {
-    u8g2->clearBuffer();
-    u8g2->setFont(HarmonyOS_Sans_14);
-    // 当前时间
-    u8g2->setCursor(3, 13);
-    u8g2->print(timeStr);
-
-    // WIFI连接图标
+    vector<StatusFlag> status;
+    // put your main code here, to run repeatedly:
     if (wifiFlag)
     {
-        // draw_wifi(u8g2);
-        drawIcon(u8g2, 113, 2, ICONS::WIFI_12X12);
+        status.push_back(StatusFlag::WIFI_CONECTED);
     }
-    // 水泵启动图标
     if (pumpFlag)
     {
-        // draw_pump(u8g2);
-        drawIcon(u8g2, 100, 2, ICONS::PUMP_12X12);
+        status.push_back(StatusFlag::PUMP_ON);
     }
-    // 水草灯启动标识
-    if (lightFlag)
-    {
-        // draw_light(u8g2);
-        drawIcon(u8g2, 87, 1, ICONS::LIGHT_12X12);
-    }
-    // 加热棒启动标识
     if (heaterFlag)
     {
-        // draw_heater(u8g2);
-        drawIcon(u8g2, 74, 2, ICONS::HEATER_12X12);
+        status.push_back(StatusFlag::HEATER_ON);
     }
-    // 加氧启动标识
+    if (lightFlag)
+    {
+        status.push_back(StatusFlag::LIGHT_ON);
+    }
     if (o2Flag)
     {
-        // draw_o2(u8g2);
-        drawIcon(u8g2, 61, 2, ICONS::O2_12X12);
+        status.push_back(StatusFlag::O2_ON);
     }
-    // 喂食器启动标识
+    if (coolerFlag)
+    {
+        status.push_back(StatusFlag::COOLER_ON);
+    }
     if (feedFlag)
     {
-        // draw_fish(u8g2);
-        drawIcon(u8g2, 48, 1, ICONS::FISH_12X12);
+        status.push_back(StatusFlag::FEEDMODE);
     }
-
-    // 分割线
-    u8g2->drawLine(4, 15, 123, 15);
-
-    // 温度显示
-    draw_temperature(u8g2, curTemp, targetTemp);
-
-    // 纵向分割
-    u8g2->drawLine(61, 22, 61, 57);
-    draw_air_temp(u8g2, airTemp);
-    draw_air_humidity(u8g2, airHumidity);
-    draw_TDS(u8g2, tds);
-    u8g2->sendBuffer();
+    draw_main_page(u8g2, timeStr, curTemp, targetTemp, airTemp, airHumidity, tds, status);
 }
 
 void draw_main_page(U8G2 *u8g2, const char *timeStr, uint8_t curTemp, uint8_t targetTemp, uint8_t airTemp, uint8_t airHumidity, uint8_t tds, vector<StatusFlag> statusFlags)
@@ -207,7 +189,7 @@ void draw_main_page(U8G2 *u8g2, const char *timeStr, uint8_t curTemp, uint8_t ta
     draw_temperature(u8g2, curTemp, targetTemp);
 
     // 纵向分割
-    u8g2->drawLine(61, 22, 61, 57);
+    u8g2->drawLine(75, 20, 75, 57);
     draw_air_temp(u8g2, airTemp);
     draw_air_humidity(u8g2, airHumidity);
     draw_TDS(u8g2, tds);

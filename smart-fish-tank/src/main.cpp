@@ -1,16 +1,27 @@
+// Check if platform define is already supplied by build system (Travis-CI defines ATMEGA for tests):
+#ifndef __ATMEGA__
+#ifndef __ESP32__
+// Not yet defined? Make a platform define for ESP32:
+#define __ESP32__
+#endif
+#endif
 #include <Arduino.h>
 #include <U8g2lib.h>
 #include <map>
 #include <SmartFishTankConfig.h>
 #include "ui/pages.h"
+#include "ui/customer_font.h"
+#include "sencers/DS18e20_util.hpp"
 
 // U8G2_SSD1306_128X64_NONAME_1_HW_I2C u8g2(U8G2_R0, U8X8_PIN_NONE);
 U8G2_SSD1306_128X64_NONAME_F_HW_I2C u8g2(U8G2_R0, U8X8_PIN_NONE, I2C_SCL, I2C_SDA);
 
+DS18e20Sencer dS18e20Sencer(TEMP_PIN);
+
 int count = 0;
 
-static boolean wifiConnected = false;
-static boolean pumpOn = false;
+static boolean wifiConnected = true;
+static boolean pumpOn = true;
 static boolean heaterOn = false;
 static boolean lightOn = false;
 static boolean o2On = false;
@@ -39,6 +50,26 @@ void (*encoder_ccw)(int variation);
 void (*encoder_press)(void);
 // 编码器长按回调
 void (*encoder_long_press)(int interval);
+
+void main_page_encoder_cw(int variation)
+{
+  Serial.printf("\nmain_page_encoder_cw: %d\n", variation);
+}
+
+void main_page_encoder_ccw(int variation)
+{
+  Serial.printf("\nmain_page_encoder_ccw: %d\n", variation);
+}
+
+void main_page_encoder_press(void)
+{
+  Serial.printf("\nmain_page_encoder_pressed \n");
+}
+
+void main_page_encoder_long_press(int interval)
+{
+  Serial.printf("\nmain_page_encoder_long_pressed: %d \n", interval);
+}
 
 /**
  * 旋转编码器中断
@@ -75,9 +106,11 @@ IRAM_ATTR void encoder_btn_inter() {
     if (spand > 1000) {
       // 长按
       encoder_long_press(spand);
+      Serial.printf("\nencoder btn long press, interval: %d\n", spand);
     } else {
       // 短按
       encoder_press();
+      Serial.printf("\nencoder btn press, interval: %d\n", spand);
     } 
   }
   else
@@ -94,15 +127,23 @@ void setup() {
   pinMode(12, OUTPUT);
   pinMode(13, OUTPUT);
 
+  dS18e20Sencer.begin();
+
   pinMode(ENCODER_PIN_A, INPUT_PULLUP);
   pinMode(ENCODER_PIN_B, INPUT_PULLUP);
   pinMode(ENCODER_PIN_BTN, INPUT);
   //编码器旋转中断
   attachInterrupt(ENCODER_PIN_A, encoder_a_inter, CHANGE);
   attachInterrupt(ENCODER_PIN_BTN, encoder_btn_inter, CHANGE);
+
+  encoder_cw = main_page_encoder_cw;
+  encoder_ccw = main_page_encoder_ccw;
+  encoder_press = main_page_encoder_press;
+  encoder_long_press = main_page_encoder_long_press;
 }
 
 void loop() {
+  // Serial.println("Running...");
   vector<StatusFlag> status;
   // put your main code here, to run repeatedly:
   if (wifiConnected)
@@ -113,28 +154,28 @@ void loop() {
   {
     status.push_back(StatusFlag::PUMP_ON);
   }
-  if (heaterOn = false)
+  if (heaterOn)
   {
     status.push_back(StatusFlag::HEATER_ON);
   }
-  if (lightOn = false)
+  if (lightOn)
   {
     status.push_back(StatusFlag::LIGHT_ON);
   }
-  if (o2On = false)
+  if (o2On)
   {
     status.push_back(StatusFlag::O2_ON);
   }
-  if (coolerOn = false)
+  if (coolerOn)
   {
     status.push_back(StatusFlag::COOLER_ON);
   }
-  if (feedMode = false)
+  if (feedMode)
   {
     status.push_back(StatusFlag::FEEDMODE);
   }
-  
-  draw_main_page(&u8g2, "17:30", curTemp, targetTemp, airTemp, airHumidity, tds, status);
+  curTemp = dS18e20Sencer.read();
+  // draw_main_page(&u8g2, "17:30", curTemp, targetTemp, airTemp, airHumidity, tds, status);
 
   delay(100);
 }
