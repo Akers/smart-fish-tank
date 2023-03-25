@@ -2,7 +2,6 @@
 #include "icons.h"
 #include "customer_font.h"
 
-
 /**
  * 绘制Wifi
  */
@@ -173,10 +172,11 @@ void draw_main_page(U8G2 *u8g2, const char *timeStr, uint8_t curTemp, uint8_t ta
 
     int size = statusFlags.size();
     int y_pox = 113;
-    for (int i = 0; i < size; i++) 
+    for (int i = 0; i < size; i++)
     {
         y_pox = 113 - (i * 13);
-        if (y_pox < 0) {
+        if (y_pox < 0)
+        {
             y_pox = 0;
         }
         drawIcon(u8g2, y_pox, 2, statusIconMap[statusFlags[i]]);
@@ -198,7 +198,7 @@ void draw_main_page(U8G2 *u8g2, const char *timeStr, uint8_t curTemp, uint8_t ta
 
 /**
  * 绘制图标菜单
-*/
+ */
 void draw_icon_menu(U8G2 *u8g2, MenuItem menu)
 {
     u8g2->clearBuffer();
@@ -219,7 +219,7 @@ static const int MENU_NAME_BOX_WIDTH = 120;
  * 绘制列表菜单
  * @param menu 当前列表菜单的父级菜单对象
  * @param post 当前菜单位置
-*/
+ */
 void draw_list_menu(U8G2 *u8g2, MenuItem menu, int pos)
 {
     u8g2->clearBuffer();
@@ -228,24 +228,25 @@ void draw_list_menu(U8G2 *u8g2, MenuItem menu, int pos)
     // 计算需展示菜单区间
     int start = (pageNum - 1) * LIST_MENU_PAGE_SIZE;
     int end = start + LIST_MENU_PAGE_SIZE - 1;
-    
-    if (end > (menu.children.size() - 1)) {
+
+    if (end > (menu.children.size() - 1))
+    {
         end = menu.children.size() - 1;
     }
     int menuNameYPos = 3;
     u8g2->setFont(HarmonyOS_Sans_12);
-    for (int i = start; i <= end; i ++)
+    for (int i = start; i <= end; i++)
     {
         // 计算展示位置
         u8g2->setCursor(MENU_NAME_POS_X, menuNameYPos);
-        
-        if (pos == i) 
+
+        if (pos == i)
         {
             // 菜单选中
             u8g2->setDrawColor(0);
             u8g2->drawRBox(MENU_NAME_POS_X, menuNameYPos, MENU_NAME_BOX_WIDTH, 16, 2);
-        } 
-        else 
+        }
+        else
         {
             u8g2->setDrawColor(1);
         }
@@ -253,7 +254,6 @@ void draw_list_menu(U8G2 *u8g2, MenuItem menu, int pos)
         u8g2->print(menu.children[i].name);
 
         menuNameYPos += 20;
-
     }
 
     u8g2->sendBuffer();

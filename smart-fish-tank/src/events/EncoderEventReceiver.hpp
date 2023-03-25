@@ -4,15 +4,17 @@
 #include "EventSource.hpp"
 #include <any>
 
-class EncoderEventReceiver:EventReceiver
+class EncoderEventReceiver : public ButtonEventReceiver
 {
 private:
     /* data */
 public:
     EncoderEventReceiver(/* args */);
     ~EncoderEventReceiver();
+    void onCw(cb_fun_t callback);
+    void onCcw(cb_fun_t callback);
 };
-
+#endif
 
 EncoderEventReceiver::EncoderEventReceiver()
 {
@@ -20,4 +22,12 @@ EncoderEventReceiver::EncoderEventReceiver()
 EncoderEventReceiver::~EncoderEventReceiver()
 {
 }
-#endif
+void EncoderEventReceiver::onCw(cb_fun_t callback)
+{
+    on(EVENTS_ENCODER_CW, callback);
+}
+
+void EncoderEventReceiver::onCcw(cb_fun_t callback)
+{
+    on(EVENTS_ENCODER_CCW, callback);
+}

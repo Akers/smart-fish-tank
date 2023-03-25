@@ -3,22 +3,24 @@
 #include <string>
 #include <vector>
 #include <any>
-#include "../events/SimpleEvent.h"
+#include "EventObject.hpp"
 
 using namespace std;
 
-class Device
+class Device : EventSource
 {
 private:
     /* data */
 public:
+    string name = "UnNamedDevice";
     Device(/* args */);
+    Device(string name) : name(name){};
     ~Device();
     /**
      * 获取触发的事件
      * @return 触发的事件名数组
     */
-    virtual vector<SimpleEvent> triggedEvents()=0;
+    virtual vector<EventObject*> triggedEvents()=0;
 };
 
 Device::Device(/* args */)

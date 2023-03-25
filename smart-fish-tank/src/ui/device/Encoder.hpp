@@ -1,6 +1,9 @@
 #ifndef __SFT_ENCODER
 #define __SFT_ENCODER
-#include "Device.hpp"
+#include "libevent/Device.hpp"
+#include "../events/ButtonEvent.hpp"
+#include "../events/EncoderEvent.hpp"
+
 #include <Arduino.h>
 
 class Encoder : public Device
@@ -18,7 +21,7 @@ private:
     boolean cw1;
     // 转向判据2
     boolean cw2;
-     // 上一次转向判据1
+    // 上一次转向判据1
     boolean lastCw1;
     // 上一次转向判据2
     boolean lastCw2;
@@ -38,6 +41,8 @@ private:
     long lastBtnChange;
     // 上次旋扭方向改变时间
     long lastDirChange;
+    // 按下时长
+    long pressTime = 0;
     // 同向旋钮短触发次数
     uint8_t shortDirChangeTimes = 0;
     // 按钮长按阈值
@@ -45,36 +50,34 @@ private:
     // 长短步间隔阈值，超过阈值的视为长步，否则为短步，毫秒
     const int shortStepThreshold = 100;
 
+private:
+    EncoderEvent checkCWEvent(bool pinAState, bool pinBState, bool switchPinState = true);
+    // 读取旋转方向
+    EventTypes readDirection();
+
 public:
     Encoder(/* args */);
-    Encoder(int ecAPin, int ecBPing, int ecBtnPin)
-        : ecAPin(ecAPin), ecBPin(ecBPin), ecBtnPin(ecBtnPin){};
-    Encoder(int ecAPin, int ecBPing, int ecBtnPin, uint8_t btnLongPressThreshold, uint8_t shortStepThreshold)
-        : ecAPin(ecAPin), ecBPin(ecBPin), ecBtnPin(ecBtnPin), ecType(ecType), btnLongPressThreshold(btnLongPressThreshold), shortStepThreshold(){};
-    Encoder(int ecAPin, int ecBPing, int ecBtnPin, char ecType)
-        : ecAPin(ecAPin), ecBPin(ecBPin), ecBtnPin(ecBtnPin), ecType(ecType){};
+    Encoder(std::string name, int ecAPin, int ecBPing, int ecBtnPin)
+        : Device(name), ecAPin(ecAPin), ecBPin(ecBPin), ecBtnPin(ecBtnPin){};
+    Encoder(std::string name, int ecAPin, int ecBPing, int ecBtnPin, uint8_t btnLongPressThreshold, uint8_t shortStepThreshold)
+        : Device(name), ecAPin(ecAPin), ecBPin(ecBPin), ecBtnPin(ecBtnPin), ecType(ecType), btnLongPressThreshold(btnLongPressThreshold), shortStepThreshold(){};
+    Encoder(std::string name, int ecAPin, int ecBPing, int ecBtnPin, char ecType)
+        : Device(name), ecAPin(ecAPin), ecBPin(ecBPin), ecBtnPin(ecBtnPin), ecType(ecType){};
     ~Encoder();
     /**
      * 触发事件判断
      */
-    vector<SimpleEvent> triggedEvents();
-    /**
-     * Must be called either from an interrupt handler associated with pin changes,
-     * or periodically from a polling loop.
-     * The current states of both pins should be passed here.
-     * Note that we expect that the default state of both pins is HIGH when the encoder is at a stable point.
-     */
-    SimpleEvent checkPins(bool pinAState, bool pinBState, bool switchPinState = true);
+    vector<EventObject *> triggedEvents();
 };
 
 Encoder::Encoder(/* args */)
 {
 }
 
-vector<SimpleEvent> Encoder::triggedEvents()
+vector<EventObject *> Encoder::triggedEvents()
 {
     long currentMillis = millis();
-    vector<SimpleEvent> events = vector<SimpleEvent>();
+    vector<EventObject *> events = vector<EventObject *>();
     // 读取按钮状态
     uint8_t btnState = digitalRead(ecBtnPin);
     if (this->ecBtnLast != btnState)
@@ -83,19 +86,21 @@ vector<SimpleEvent> Encoder::triggedEvents()
         // 低-->高，按下
         if (btnState == HIGH)
         {
-            events.push_back(SimpleEvent(EVENTS_PRESSED));
+            events.push_back(&ButtonEvent::newPressedEvent());
         }
         else
         {
-            events.push_back(SimpleEvent(EVENTS_RELEASED));
-            if (currentMillis - this->lastBtnChange > this->btnLongPressThreshold)
+            events.push_back(&ButtonEvent::newReleasedEvent());
+            this->pressTime = currentMillis - this->lastBtnChange;
+            if (this->pressTime > this->btnLongPressThreshold)
             {
-                std::any payload = currentMillis - this->lastBtnChange;
-                events.push_back(SimpleEvent(EVENTS_LONGPRESS, payload));
+                ButtonEvent _e = ButtonEvent(EventTypes::LONGPRESS, this->pressTime);
+
+                events.push_back(&_e);
             }
             else
             {
-                events.push_back(SimpleEvent(EVENTS_CLICKED));
+                events.push_back(&ButtonEvent::newClickedEvent());
             }
         }
 
@@ -103,12 +108,12 @@ vector<SimpleEvent> Encoder::triggedEvents()
     }
 
     // 读取编码器旋转
-    SimpleEvent _event = this->checkCWEvent(digitalRead(ecAPin), digitalRead(ecBPin));
-    // 判断是否触发事件
-    if (EVENTS_ENCODER_CW == _event.name || EVENTS_ENCODER_CCW == _event.name)
+    EncoderEvent *_event = &this->checkCWEvent(digitalRead(ecAPin), digitalRead(ecBPin));
+    if (_event != NULL)
     {
-        
+        events.push_back(_event);
     }
+
     return events;
 }
 
@@ -118,7 +123,7 @@ vector<SimpleEvent> Encoder::triggedEvents()
  * The current states of both pins should be passed here.
  * Note that we expect that the default state of both pins is HIGH when the encoder is at a stable point.
  */
-SimpleEvent Encoder::checkCWEvent(bool pinAState, bool pinBState, bool switchPinState = true)
+EncoderEvent Encoder::checkCWEvent(bool pinAState, bool pinBState, bool switchPinState = true)
 {
     long currentMillis = millis();
     if (ecReadFlag == 0 && digitalRead(ecAPin) == LOW)
@@ -128,15 +133,7 @@ SimpleEvent Encoder::checkCWEvent(bool pinAState, bool pinBState, bool switchPin
         // 处理上一轮读取中可能忽略掉的短步
         if (currentMillis - this->lastCwEventMills > this->shortStepThreshold)
         {
-            if (this->cw1 == true && this->cw2 == true)
-            {
-                return SimpleEvent(EVENTS_ENCODER_CW, this->shortDirChangeTimes);
-            }
-
-            if (this->cw1 == false && this->cw2 == false)
-            {
-                return SimpleEvent(EVENTS_ENCODER_CCW, this->shortDirChangeTimes);
-            }
+            return EncoderEvent(this->readDirection(), this->shortDirChangeTimes);
         }
     }
 
@@ -146,42 +143,34 @@ SimpleEvent Encoder::checkCWEvent(bool pinAState, bool pinBState, bool switchPin
         // 判断是否和上次同向
         if (this->lastCw1 == this->cw1 && this->lastCw2 == this->cw2)
         {
-            this->shortDirChangeTimes ++;
-
-            // 判断长短步
-            if (currentMillis - this->lastCwEventMills > this->shortStepThreshold)
-            {
-                // 长步
-                _event.payload = 1;
-            }
-            else 
-            {
-                // 短步，截取时间段步数
-                _event.payload = 1;
-            }
+            this->shortDirChangeTimes++;
             this->lastCwEventMills = millis();
-            events.push_back(_event);
-
-
-
-        } else {
+        }
+        else
+        {
             // 记录方向改变时间
             this->lastDirChange = millis();
             this->shortDirChangeTimes = 0;
         }
 
+        // 判断长短步
+        return EncoderEvent(this->readDirection(), this->shortDirChangeTimes);
         ecReadFlag = 0;
+    }
 
-        if (this->cw1 == true && this->cw2 == true)
-        {
-            return EVENTS_ENCODER_CW;
-        }
+    return;
+}
 
-        if (this->cw1 == false && this->cw2 == false)
-        {
-            return EVENTS_ENCODER_CCW;
-        }
-        
+EventTypes Encoder::readDirection()
+{
+    if (this->cw1 == true && this->cw2 == true)
+    {
+        return EventTypes::ENCODER_CW;
+    }
+
+    if (this->cw1 == false && this->cw2 == false)
+    {
+        return EventTypes::ENCODER_CCW;
     }
 }
 
